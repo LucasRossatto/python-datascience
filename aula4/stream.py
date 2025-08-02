@@ -6,17 +6,19 @@ df = pd.read_csv("aula4/vendas_loja.csv")
 df["Receita"] = df["Quantidade"] * df["Preço_unitario"]
 df["Data"] = pd.to_datetime(df["Data"])
 df["Mês"] = df["Data"].dt.to_period("M")
-df["Ticket-medio"] = df["Receita"] / df["Quantidade"] 
+df["Produto_Mais_Vendido"] = df["Produto"]("Quantidade")
+df["Ticket-medio"] = df["Receita"].sum() / df["Quantidade"].sum() 
 st.title("Dashboard de vendas")
 st.markdown(
     """ 
-    Bem vindo a Dashboard de vendas, feita em Streamlit e pands 
+    Bem vindo a Dashboard de vendas, feita em Streamlit, pandas e Matplotlib 
     """
 )
 
 st.metric("Total de vendas", f"R$ {df["Receita"].sum():,.2f}")
 st.metric("Média por venda", f"R$ {df['Receita'].mean():,.2f}")
 st.metric("Ticket Médio", f"R$ {df['Ticket-medio'].mean():,.2f}")
+st.metric("Produto Mais vendido", f"R${df['Produto_Mais_Vendido']}")
 
 categorias = df["Categoria"].unique()
 categoria_selecionada = st.selectbox("Selecione a categoria", categorias)
@@ -48,7 +50,7 @@ ticket_produto = ticket_produto.set_index("Produto")
 ticket_produto["Ticket-medio"] = ticket_produto["Ticket-medio"].apply(lambda x: f"R$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
 
 
-tab1, tab2 = st.tabs(["📈 Gráfico", "📋 Tabela"])
+tab1, tab2 = st.tabs(["Gráfico", "Tabela"])
 tab1.line_chart(ticket_produto, height=250)
 tab2.dataframe(ticket_produto, height=250, use_container_width=True)
 
