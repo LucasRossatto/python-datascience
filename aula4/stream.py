@@ -11,12 +11,6 @@ st.title("Dashboard de vendas")
 st.markdown(
     """ 
     Bem vindo a Dashboard de vendas, feita em Streamlit e pands 
-
-    **There's  you can build!**
-    
-    We prepared a few examples for you to get started. Just 
-    click on the buttons above and discover what you can do 
-    with Streamlit. 
     """
 )
 
