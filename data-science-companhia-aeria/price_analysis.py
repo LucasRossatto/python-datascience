@@ -4,35 +4,66 @@ import matplotlib.pyplot as plt
 
 df = pd.read_csv("data-science-companhia-aeria/dados_voos.csv")
 
-st.title("💰 Análise de Preços")
-st.caption("Explorando os preços das passagens por companhia e ao longo dos meses.")
+df["Receita"] = df["Preco_R$"]
+ticket_medio_geral = df["Preco_R$"].mean()
 
-tab1, tab2 = st.tabs(["📊 Preço médio por companhia", "📅 Distribuição de preços por mês"])
+st.title("💰 Dashboard Completo - Análise de Voos")
 
-with tab1:
-    st.subheader("Preço médio por companhia")
-    fig1, ax1 = plt.subplots()
-    df.groupby("Companhia")["Preco_R$"].mean().plot(kind="bar", ax=ax1, color="skyblue", edgecolor="black")
-    ax1.set_ylabel("Preço médio (R$)")
-    ax1.set_xlabel("Companhia")
-    ax1.set_title("Preço médio das passagens por companhia aérea")
-    st.pyplot(fig1)
+tab_revenue, tab_prices, tab_distribution,tab_ticket_mes = st.tabs([
+    "💵 Receita e Ticket Médio por Companhia",
+    "📊 Preço Médio por Companhia",
+    "📅 Distribuição de Preços por Mês",
+    "📅Ticket medio por data"
+])
 
+with tab_revenue:
+    st.header("Receita e Ticket Médio por Companhia")
+    companhias = df["Companhia"].unique()
+    companhia_selecionada = st.selectbox("Selecione a Companhia", companhias)
+    df_filtrado = df[df["Companhia"] == companhia_selecionada]
+
+    receita_total = df_filtrado["Receita"].sum()
+    ticket_medio = df_filtrado["Preco_R$"].mean()
+    media_venda = df_filtrado['Receita'].mean()
+    
+
+    st.metric(f"Receita Total - {companhia_selecionada}", f"R$ {receita_total:.2f}")
+    st.metric(f"Ticket Médio - {companhia_selecionada}", f"R$ {ticket_medio:.2f}")
+    st.metric(f"Média por venda - {companhia_selecionada}", f"R$ {media_venda:,.2f}")
+
+
+with tab_prices:
+    st.header("Preço Médio por Companhia")
+    fig, ax = plt.subplots()
+    df.groupby("Companhia")["Preco_R$"].mean().plot(kind="bar", ax=ax, color="skyblue", edgecolor="black")
+    ax.set_ylabel("Preço médio (R$)")
+    ax.set_xlabel("Companhia")
+    ax.set_title("Preço médio das passagens por companhia")
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
+    
     with st.expander("ℹ️ Detalhes"):
-        st.write("Esse gráfico mostra o preço médio das passagens agrupado por companhia aérea. "
-                 "Ele ajuda a identificar quais companhias têm preços mais altos ou mais baixos.")
+        st.write("Esse gráfico mostra o preço médio das passagens agrupado por companhia aérea.")
 
-with tab2:
-    st.subheader("Distribuição dos preços por mês")
-    fig2, ax2 = plt.subplots()
-    dados_por_mes = [df.loc[df["Mes"] == mes, "Preco_R$"] for mes in sorted(df["Mes"].unique())]
-    ax2.boxplot(dados_por_mes)
-    ax2.set_title("Distribuição dos preços por mês")
-    ax2.set_xlabel("Mês")
-    ax2.set_ylabel("Preço (R$)")
-    ax2.set_xticklabels(sorted(df["Mes"].unique()))
-    st.pyplot(fig2)
-
+with tab_distribution:
+    st.header("Distribuição dos Preços por Mês")
+    fig, ax = plt.subplots()
+    meses_ordenados = sorted(df["Mes"].unique())
+    dados_por_mes = [df.loc[df["Mes"] == mes, "Preco_R$"] for mes in meses_ordenados]
+    ax.boxplot(dados_por_mes)
+    ax.set_title("Distribuição dos preços por mês")
+    ax.set_xlabel("Mês")
+    ax.set_ylabel("Preço (R$)")
+    ax.set_xticklabels(meses_ordenados)
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
+    
     with st.expander("ℹ️ Detalhes"):
-        st.write("O boxplot permite visualizar a variação dos preços por mês, detectando valores "
-                 "muito altos ou muito baixos (outliers) e identificando períodos com maior variação.")
+        st.write("Boxplot que mostra a variação dos preços por mês, permitindo identificar outliers e meses com maior variação.")
+
+with tab_ticket_mes:
+    df["Ticket-medio"] = df_filtrado["Preco_R$"].mean()
+    st.subheader("Ticket Médio mensal")
+    fig, ax = plt.subplots()
+    df.groupby("Mes")["Ticket-medio"].sum().plot(ax=ax)
+    st.pyplot(fig)
